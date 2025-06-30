@@ -17,17 +17,9 @@ import { RealtimeMetrics } from '@/components/dashboard/RealtimeMetrics';
 import { Layout } from '@/components/layout/Layout';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { useRevenueData, useKPIMetrics } from '@/hooks/useAnalytics';
 
-// Sample data for charts
-const revenueData = [
-    { name: 'Jan', value: 45000 },
-    { name: 'Feb', value: 52000 },
-    { name: 'Mar', value: 48000 },
-    { name: 'Apr', value: 61000 },
-    { name: 'May', value: 55000 },
-    { name: 'Jun', value: 67000 },
-];
-
+// Static data for charts that don't have real data yet
 const trafficData = [
     { name: 'Mon', value: 12400 },
     { name: 'Tue', value: 13600 },
@@ -52,6 +44,34 @@ const conversionData = [
 ];
 
 export default function HomePage() {
+    const { revenueData, loading: revenueLoading } = useRevenueData();
+    const { metrics, loading: metricsLoading } = useKPIMetrics();
+
+    // Helper function to get metric value
+    const getMetricValue = (metricName: string, defaultValue: string = '0') => {
+        const metric = metrics.find((m) => m.metric_name === metricName);
+        return metric ? metric.value.toString() : defaultValue;
+    };
+
+    // Helper function to format values
+    const formatKPIValue = (metricName: string) => {
+        const metric = metrics.find((m) => m.metric_name === metricName);
+        if (!metric) return { value: '0', change: 0 };
+
+        switch (metricName) {
+            case 'active_users':
+                return { value: metric.value.toLocaleString(), change: 8.2 };
+            case 'conversion_rate':
+                return { value: `${metric.value}%`, change: -2.1 };
+            case 'avg_session_duration':
+                const minutes = Math.floor(metric.value / 60);
+                const seconds = metric.value % 60;
+                return { value: `${minutes}m ${seconds}s`, change: 15.3 };
+            default:
+                return { value: metric.value.toString(), change: 0 };
+        }
+    };
+
     return (
         <Layout>
             <div className="space-y-8">
@@ -93,24 +113,36 @@ export default function HomePage() {
                     />
                     <KPICard
                         title="Active Users"
-                        value="8,549"
-                        change={8.2}
+                        value={
+                            metricsLoading
+                                ? 'Loading...'
+                                : formatKPIValue('active_users').value
+                        }
+                        change={formatKPIValue('active_users').change}
                         icon={Users}
                         trend="up"
                         color="blue"
                     />
                     <KPICard
                         title="Conversion Rate"
-                        value="3.24%"
-                        change={-2.1}
+                        value={
+                            metricsLoading
+                                ? 'Loading...'
+                                : formatKPIValue('conversion_rate').value
+                        }
+                        change={formatKPIValue('conversion_rate').change}
                         icon={ShoppingCart}
                         trend="down"
                         color="orange"
                     />
                     <KPICard
                         title="Avg. Session"
-                        value="4m 32s"
-                        change={15.3}
+                        value={
+                            metricsLoading
+                                ? 'Loading...'
+                                : formatKPIValue('avg_session_duration').value
+                        }
+                        change={formatKPIValue('avg_session_duration').change}
                         icon={Activity}
                         trend="up"
                         color="purple"
@@ -121,14 +153,27 @@ export default function HomePage() {
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                     {/* Left Column - Charts */}
                     <div className="lg:col-span-2 space-y-8">
-                        {/* Revenue Chart */}
-                        <ChartCard
-                            title="Revenue Overview"
-                            type="area"
-                            data={revenueData}
-                            height={350}
-                            color="#3b82f6"
-                        />
+                        {/* Revenue Chart - Using Real Data */}
+                        {revenueLoading ? (
+                            <Card className="chart-container">
+                                <CardHeader>
+                                    <CardTitle>Revenue Overview</CardTitle>
+                                </CardHeader>
+                                <CardContent className="flex items-center justify-center h-[350px]">
+                                    <div className="text-neutral-500">
+                                        Loading revenue data...
+                                    </div>
+                                </CardContent>
+                            </Card>
+                        ) : (
+                            <ChartCard
+                                title="Revenue Overview"
+                                type="area"
+                                data={revenueData}
+                                height={350}
+                                color="#3b82f6"
+                            />
+                        )}
 
                         {/* Charts Row */}
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
