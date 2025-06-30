@@ -52,10 +52,6 @@ export function AppSidebar() {
   const collapsed = state === "collapsed";
 
   const isActive = (path: string) => currentPath === path;
-  const getNavCls = ({ isActive }: { isActive: boolean }) =>
-    isActive 
-      ? "bg-primary-50 text-primary-600 font-medium border-r-2 border-primary-500" 
-      : "hover:bg-neutral-50 text-neutral-700 hover:text-neutral-900";
 
   return (
     <Sidebar
@@ -66,7 +62,7 @@ export function AppSidebar() {
         {/* Logo */}
         <div className="p-6 border-b border-neutral-200">
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 bg-ai-gradient-1 rounded-lg flex items-center justify-center">
+            <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
               <PieChart className="w-4 h-4 text-white" />
             </div>
             {!collapsed && (
@@ -92,8 +88,11 @@ export function AppSidebar() {
                       to={item.url} 
                       end 
                       className={({ isActive }) => `
-                        flex items-center gap-3 px-3 py-2 rounded-lg transition-all duration-200
-                        ${getNavCls({ isActive })}
+                        flex items-center gap-3 px-3 py-2 rounded-lg transition-all duration-200 text-neutral-700
+                        ${isActive 
+                          ? "bg-blue-50 !text-blue-600 font-medium border-r-2 border-blue-500" 
+                          : "hover:bg-neutral-50 hover:!text-neutral-900"
+                        }
                       `}
                     >
                       <item.icon className="w-5 h-5 flex-shrink-0" />
@@ -108,7 +107,7 @@ export function AppSidebar() {
 
         {/* AI Features */}
         <SidebarGroup className="px-3 py-4">
-          <SidebarGroupLabel className="text-xs font-semibold text-ai-purple uppercase tracking-wide mb-2">
+          <SidebarGroupLabel className="text-xs font-semibold text-purple-600 uppercase tracking-wide mb-2">
             {!collapsed && "AI Powered"}
           </SidebarGroupLabel>
           <SidebarGroupContent>
@@ -119,10 +118,10 @@ export function AppSidebar() {
                     <NavLink 
                       to={item.url} 
                       className={({ isActive }) => `
-                        flex items-center gap-3 px-3 py-2 rounded-lg transition-all duration-200
+                        flex items-center gap-3 px-3 py-2 rounded-lg transition-all duration-200 text-neutral-700
                         ${isActive 
-                          ? "bg-ai-gradient-1 text-white font-medium shadow-lg" 
-                          : "hover:bg-purple-50 text-neutral-700 hover:text-ai-purple"
+                          ? "bg-gradient-to-r from-purple-500 to-blue-500 !text-white font-medium shadow-lg" 
+                          : "hover:bg-purple-50 hover:!text-purple-600"
                         }
                       `}
                     >
@@ -146,8 +145,11 @@ export function AppSidebar() {
                     <NavLink 
                       to={item.url} 
                       className={({ isActive }) => `
-                        flex items-center gap-3 px-3 py-2 rounded-lg transition-all duration-200
-                        ${getNavCls({ isActive })}
+                        flex items-center gap-3 px-3 py-2 rounded-lg transition-all duration-200 text-neutral-700
+                        ${isActive 
+                          ? "bg-blue-50 !text-blue-600 font-medium border-r-2 border-blue-500" 
+                          : "hover:bg-neutral-50 hover:!text-neutral-900"
+                        }
                       `}
                     >
                       <item.icon className="w-5 h-5 flex-shrink-0" />
