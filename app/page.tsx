@@ -17,30 +17,36 @@ import { RealtimeMetrics } from '@/components/dashboard/RealtimeMetrics';
 import { Layout } from '@/components/layout/Layout';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { useRevenueData, useKPIMetrics } from '@/hooks/useAnalytics';
+import {
+    useRevenueData,
+    useKPIMetrics,
+    parseNumericValue,
+} from '@/hooks/useAnalytics';
 
 // Static data for charts that don't have real data yet
 const trafficData = [
-    { name: 'Mon', value: 12400 },
-    { name: 'Tue', value: 13600 },
+    { name: 'Mon', value: 12000 },
+    { name: 'Tue', value: 13500 },
     { name: 'Wed', value: 11800 },
     { name: 'Thu', value: 14200 },
-    { name: 'Fri', value: 16800 },
-    { name: 'Sat', value: 15200 },
-    { name: 'Sun', value: 13400 },
+    { name: 'Fri', value: 15800 },
+    { name: 'Sat', value: 14500 },
+    { name: 'Sun', value: 13200 },
 ];
 
 const userSegmentData = [
-    { name: 'Desktop', value: 45 },
-    { name: 'Mobile', value: 35 },
-    { name: 'Tablet', value: 20 },
+    { name: 'New Users', value: 35, color: '#3b82f6' },
+    { name: 'Returning', value: 45, color: '#10b981' },
+    { name: 'Premium', value: 20, color: '#f59e0b' },
 ];
 
 const conversionData = [
-    { name: 'Q1', value: 23 },
-    { name: 'Q2', value: 27 },
-    { name: 'Q3', value: 31 },
-    { name: 'Q4', value: 29 },
+    { name: 'Jan', value: 2.4 },
+    { name: 'Feb', value: 2.6 },
+    { name: 'Mar', value: 2.3 },
+    { name: 'Apr', value: 2.8 },
+    { name: 'May', value: 3.1 },
+    { name: 'Jun', value: 2.9 },
 ];
 
 export default function HomePage() {
@@ -53,22 +59,26 @@ export default function HomePage() {
         return metric ? metric.value.toString() : defaultValue;
     };
 
-    // Helper function to format values
+    // Helper function to format values with proper number parsing
     const formatKPIValue = (metricName: string) => {
         const metric = metrics.find((m) => m.metric_name === metricName);
-        if (!metric) return { value: '0', change: 0 };
+        if (!metric) {
+            return { value: '0', change: 0 };
+        }
+
+        const numericValue = parseNumericValue(metric.value);
 
         switch (metricName) {
             case 'active_users':
-                return { value: metric.value.toLocaleString(), change: 8.2 };
+                return { value: numericValue.toLocaleString(), change: 8.2 };
             case 'conversion_rate':
-                return { value: `${metric.value}%`, change: -2.1 };
+                return { value: `${numericValue}%`, change: -2.1 };
             case 'avg_session_duration':
-                const minutes = Math.floor(metric.value / 60);
-                const seconds = metric.value % 60;
+                const minutes = Math.floor(numericValue / 60);
+                const seconds = numericValue % 60;
                 return { value: `${minutes}m ${seconds}s`, change: 15.3 };
             default:
-                return { value: metric.value.toString(), change: 0 };
+                return { value: numericValue.toString(), change: 0 };
         }
     };
 

@@ -6,7 +6,7 @@ import { supabase } from '@/lib/supabase';
 interface AnalyticsMetric {
     id: string;
     metric_name: string;
-    value: number;
+    value: string | number;
     dimensions: Record<string, any>;
     timestamp: string;
 }
@@ -20,6 +20,13 @@ interface AIInsight {
     impact_level: string;
     created_at: string;
 }
+
+// Helper function to safely parse numeric values
+const parseNumericValue = (value: string | number): number => {
+    if (typeof value === 'number') return value;
+    const parsed = parseFloat(value.toString());
+    return isNaN(parsed) ? 0 : parsed;
+};
 
 // Hook for fetching KPI metrics
 export function useKPIMetrics() {
@@ -42,6 +49,7 @@ export function useKPIMetrics() {
                     .order('timestamp', { ascending: false });
 
                 if (error) throw error;
+
                 setMetrics(data || []);
             } catch (err) {
                 setError(
@@ -75,12 +83,12 @@ export function useRevenueData() {
 
                 if (error) throw error;
 
-                // Transform data for charts
+                // Transform data for charts with proper number parsing
                 const chartData =
                     data?.map((item) => ({
                         name:
                             item.dimensions?.period?.split(' ')[0] || 'Unknown',
-                        value: item.value,
+                        value: parseNumericValue(item.value),
                     })) || [];
 
                 setRevenueData(chartData);
@@ -163,6 +171,7 @@ export function useRealtimeMetrics() {
                     .order('timestamp', { ascending: false });
 
                 if (error) throw error;
+
                 setMetrics(data || []);
             } catch (err) {
                 setError(
@@ -235,3 +244,6 @@ export function useChartData(
 
     return { chartData, loading, error };
 }
+
+// Export the helper function for use in other components
+export { parseNumericValue };

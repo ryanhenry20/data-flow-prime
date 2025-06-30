@@ -11,7 +11,7 @@ import {
     TrendingDown,
     Loader2,
 } from 'lucide-react';
-import { useRealtimeMetrics } from '@/hooks/useAnalytics';
+import { useRealtimeMetrics, parseNumericValue } from '@/hooks/useAnalytics';
 
 export function RealtimeMetrics() {
     const { metrics, loading, error } = useRealtimeMetrics();
@@ -26,10 +26,10 @@ export function RealtimeMetrics() {
         return () => clearInterval(timer);
     }, []);
 
-    // Helper function to get metric value
+    // Helper function to get metric value with proper parsing
     const getMetricValue = (metricName: string) => {
         const metric = metrics.find((m) => m.metric_name === metricName);
-        return metric ? metric.value : 0;
+        return metric ? parseNumericValue(metric.value) : 0;
     };
 
     // Static data for metrics that might not be in database yet
@@ -212,21 +212,26 @@ export function RealtimeMetrics() {
                                     ) : (
                                         <TrendingDown className="w-3 h-3" />
                                     )}
-                                    {Math.abs(metric.change)}%
+                                    {metric.change > 0 ? '+' : ''}
+                                    {metric.change}%
                                 </div>
                             </div>
                         </div>
                     ))}
                 </div>
 
-                {/* Status indicator */}
-                <div className="text-center pt-2">
-                    <div className="flex items-center justify-center gap-2 text-xs text-neutral-500">
+                {/* Live activity indicator */}
+                <div className="flex items-center justify-center pt-4 border-t border-neutral-200">
+                    <div className="flex items-center gap-2 text-green-600">
                         <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-                        System operational • Data refreshing every 30s
+                        <span className="text-sm font-medium">
+                            Live monitoring active
+                        </span>
                     </div>
                 </div>
             </CardContent>
         </Card>
     );
 }
+
+export default RealtimeMetrics;
