@@ -16,7 +16,7 @@ export function ReactQueryProvider({
         <QueryClientProvider client={queryClient}>
             <ThemeProvider
                 attribute="class"
-                defaultTheme="system"
+                defaultTheme="light"
                 enableSystem
                 disableTransitionOnChange>
                 <DashboardWidgetsProvider>{children}</DashboardWidgetsProvider>
