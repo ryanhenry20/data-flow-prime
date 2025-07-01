@@ -11,10 +11,19 @@ import {
     TrendingUp,
     FileText,
     Bell,
+    LayoutDashboard,
+    Star,
+    Download,
+    Moon,
+    Sun,
+    Monitor,
+    Palette,
+    History,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { useRouter } from 'next/navigation';
+import { useTheme } from 'next-themes';
 
 const Command = React.forwardRef<
     React.ElementRef<typeof CommandPrimitive>,
@@ -34,7 +43,7 @@ Command.displayName = CommandPrimitive.displayName;
 const CommandDialog = ({ children, ...props }: DialogProps) => {
     return (
         <Dialog {...props}>
-            <DialogContent className="overflow-hidden p-0 shadow-lg">
+            <DialogContent className="overflow-hidden p-0 shadow-lg [&>div]:max-w-[650px]">
                 <Command className="[&_[cmdk-group-heading]]:px-2 [&_[cmdk-group-heading]]:font-medium [&_[cmdk-group-heading]]:text-muted-foreground [&_[cmdk-group]:not([hidden])_~[cmdk-group]]:pt-0 [&_[cmdk-group]]:px-2 [&_[cmdk-input-wrapper]_svg]:h-5 [&_[cmdk-input-wrapper]_svg]:w-5 [&_[cmdk-input]]:h-12 [&_[cmdk-item]]:px-2 [&_[cmdk-item]]:py-3 [&_[cmdk-item]_svg]:h-5 [&_[cmdk-item]_svg]:w-5">
                     {children}
                 </Command>
@@ -68,7 +77,7 @@ const CommandList = React.forwardRef<
     <CommandPrimitive.List
         ref={ref}
         className={cn(
-            'max-h-[300px] overflow-y-auto overflow-x-hidden',
+            'max-h-[400px] overflow-y-auto overflow-x-hidden',
             className
         )}
         {...props}
@@ -153,35 +162,58 @@ interface CommandPaletteProps {
 
 export function CommandPalette({ open, onOpenChange }: CommandPaletteProps) {
     const router = useRouter();
+    const { setTheme } = useTheme();
     const [inputValue, setInputValue] = React.useState('');
 
     const commands = [
         {
+            group: 'Recent',
+            items: [
+                {
+                    icon: History,
+                    label: 'Go to Analytics',
+                    shortcut: '',
+                    action: () => router.push('/analytics'),
+                },
+                {
+                    icon: History,
+                    label: 'Export Dashboard',
+                    shortcut: '',
+                    action: () => console.log('Export dashboard'),
+                },
+            ],
+        },
+        {
             group: 'Navigation',
             items: [
                 {
-                    icon: TrendingUp,
-                    label: 'Go to Dashboard',
+                    icon: LayoutDashboard,
+                    label: 'Dashboard',
+                    shortcut: '⌘H',
                     action: () => router.push('/'),
                 },
                 {
                     icon: TrendingUp,
-                    label: 'Go to Analytics',
+                    label: 'Analytics',
+                    shortcut: '⌘A',
                     action: () => router.push('/analytics'),
                 },
                 {
                     icon: FileText,
-                    label: 'Go to Reports',
+                    label: 'Reports',
+                    shortcut: '⌘R',
                     action: () => router.push('/reports'),
                 },
                 {
                     icon: Users,
-                    label: 'Go to Users',
+                    label: 'Users',
+                    shortcut: '⌘U',
                     action: () => router.push('/users'),
                 },
                 {
                     icon: Settings,
-                    label: 'Go to Settings',
+                    label: 'Settings',
+                    shortcut: '⌘,',
                     action: () => router.push('/settings'),
                 },
             ],
@@ -190,19 +222,45 @@ export function CommandPalette({ open, onOpenChange }: CommandPaletteProps) {
             group: 'AI Features',
             items: [
                 {
-                    icon: TrendingUp,
+                    icon: Star,
                     label: 'AI Insights',
+                    shortcut: '⌘I',
                     action: () => router.push('/ai-insights'),
                 },
                 {
                     icon: TrendingUp,
                     label: 'Predictions',
+                    shortcut: '⌘P',
                     action: () => router.push('/predictions'),
                 },
                 {
                     icon: Bell,
                     label: 'Smart Alerts',
+                    shortcut: '⌘⇧A',
                     action: () => router.push('/alerts'),
+                },
+            ],
+        },
+        {
+            group: 'Theme',
+            items: [
+                {
+                    icon: Sun,
+                    label: 'Light mode',
+                    shortcut: '',
+                    action: () => setTheme('light'),
+                },
+                {
+                    icon: Moon,
+                    label: 'Dark mode',
+                    shortcut: '',
+                    action: () => setTheme('dark'),
+                },
+                {
+                    icon: Monitor,
+                    label: 'System theme',
+                    shortcut: '',
+                    action: () => setTheme('system'),
                 },
             ],
         },
@@ -210,19 +268,22 @@ export function CommandPalette({ open, onOpenChange }: CommandPaletteProps) {
             group: 'Quick Actions',
             items: [
                 {
-                    icon: FileText,
+                    icon: Download,
                     label: 'Export Dashboard',
+                    shortcut: '⌘E',
                     action: () => console.log('Export dashboard'),
                 },
                 {
                     icon: Calendar,
                     label: 'Schedule Report',
+                    shortcut: '⌘⇧S',
                     action: () => console.log('Schedule report'),
                 },
                 {
-                    icon: Settings,
-                    label: 'Dashboard Settings',
-                    action: () => console.log('Settings'),
+                    icon: Palette,
+                    label: 'Customize Dashboard',
+                    shortcut: '⌘⇧D',
+                    action: () => console.log('Customize dashboard'),
                 },
             ],
         },
@@ -249,9 +310,14 @@ export function CommandPalette({ open, onOpenChange }: CommandPaletteProps) {
                             <CommandItem
                                 key={`${group.group}-${index}`}
                                 onSelect={() => handleSelect(item.action)}
-                                className="flex items-center gap-2 cursor-pointer">
+                                className="flex items-center gap-3 cursor-pointer">
                                 <item.icon className="w-4 h-4" />
-                                {item.label}
+                                <span className="flex-1">{item.label}</span>
+                                {item.shortcut && (
+                                    <CommandShortcut>
+                                        {item.shortcut}
+                                    </CommandShortcut>
+                                )}
                             </CommandItem>
                         ))}
                     </CommandGroup>

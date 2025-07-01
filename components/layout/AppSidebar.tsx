@@ -58,21 +58,21 @@ export function AppSidebar() {
         <Sidebar
             className={`${
                 collapsed ? 'w-16' : 'w-64'
-            } border-r border-neutral-200 bg-white`}
+            } border-r border-neutral-200 dark:border-neutral-800 bg-white dark:bg-gray-950`}
             collapsible="icon">
             <SidebarContent className="p-0">
                 {/* Logo */}
-                <div className="p-6 border-b border-neutral-200">
+                <div className="p-6 border-b border-neutral-200 dark:border-neutral-800">
                     <div className="flex items-center gap-3">
                         <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
                             <PieChart className="w-4 h-4 text-white" />
                         </div>
                         {!collapsed && (
                             <div>
-                                <h1 className="font-bold text-neutral-900">
+                                <h1 className="font-bold text-neutral-900 dark:text-neutral-100">
                                     Analytics AI
                                 </h1>
-                                <p className="text-xs text-neutral-500">
+                                <p className="text-xs text-neutral-500 dark:text-neutral-400">
                                     Enterprise Dashboard
                                 </p>
                             </div>
@@ -82,7 +82,7 @@ export function AppSidebar() {
 
                 {/* Main Navigation */}
                 <SidebarGroup className="px-3 py-4">
-                    <SidebarGroupLabel className="text-xs font-semibold text-neutral-500 uppercase tracking-wide mb-2">
+                    <SidebarGroupLabel className="text-xs font-semibold text-neutral-500 dark:text-neutral-400 uppercase tracking-wide mb-2">
                         {!collapsed && 'Main'}
                     </SidebarGroupLabel>
                     <SidebarGroupContent>
@@ -93,11 +93,11 @@ export function AppSidebar() {
                                         <Link
                                             href={item.url}
                                             className={`
-                        flex items-center gap-3 px-3 py-2 rounded-lg transition-all duration-200 text-neutral-700
+                        flex items-center gap-3 px-3 py-2 rounded-lg transition-all duration-200 text-neutral-700 dark:text-neutral-300
                         ${
                             isActive(item.url)
-                                ? 'bg-blue-50 !text-blue-600 font-medium border-r-2 border-blue-500'
-                                : 'hover:bg-neutral-50 hover:!text-neutral-900'
+                                ? 'bg-blue-50 dark:bg-blue-950/50 !text-blue-600 dark:!text-blue-400 font-medium border-r-2 border-blue-500'
+                                : 'hover:bg-neutral-50 dark:hover:bg-neutral-900 hover:!text-neutral-900 dark:hover:!text-neutral-100'
                         }
                       `}>
                                             <item.icon className="w-5 h-5 flex-shrink-0" />
@@ -116,7 +116,7 @@ export function AppSidebar() {
 
                 {/* AI Features */}
                 <SidebarGroup className="px-3 py-4">
-                    <SidebarGroupLabel className="text-xs font-semibold text-purple-600 uppercase tracking-wide mb-2">
+                    <SidebarGroupLabel className="text-xs font-semibold text-purple-600 dark:text-purple-400 uppercase tracking-wide mb-2">
                         {!collapsed && 'AI Powered'}
                     </SidebarGroupLabel>
                     <SidebarGroupContent>
@@ -127,11 +127,11 @@ export function AppSidebar() {
                                         <Link
                                             href={item.url}
                                             className={`
-                        flex items-center gap-3 px-3 py-2 rounded-lg transition-all duration-200 text-neutral-700
+                        flex items-center gap-3 px-3 py-2 rounded-lg transition-all duration-200 text-neutral-700 dark:text-neutral-300
                         ${
                             isActive(item.url)
                                 ? 'bg-gradient-to-r from-purple-500 to-blue-500 !text-white font-medium shadow-lg'
-                                : 'hover:bg-purple-50 hover:!text-purple-600'
+                                : 'hover:bg-purple-50 dark:hover:bg-purple-950/30 hover:!text-purple-600 dark:hover:!text-purple-400'
                         }
                       `}>
                                             <item.icon className="w-5 h-5 flex-shrink-0" />
@@ -158,11 +158,11 @@ export function AppSidebar() {
                                         <Link
                                             href={item.url}
                                             className={`
-                        flex items-center gap-3 px-3 py-2 rounded-lg transition-all duration-200 text-neutral-700
+                        flex items-center gap-3 px-3 py-2 rounded-lg transition-all duration-200 text-neutral-700 dark:text-neutral-300
                         ${
                             isActive(item.url)
-                                ? 'bg-blue-50 !text-blue-600 font-medium border-r-2 border-blue-500'
-                                : 'hover:bg-neutral-50 hover:!text-neutral-900'
+                                ? 'bg-blue-50 dark:bg-blue-950/50 !text-blue-600 dark:!text-blue-400 font-medium border-r-2 border-blue-500'
+                                : 'hover:bg-neutral-50 dark:hover:bg-neutral-900 hover:!text-neutral-900 dark:hover:!text-neutral-100'
                         }
                       `}>
                                             <item.icon className="w-5 h-5 flex-shrink-0" />

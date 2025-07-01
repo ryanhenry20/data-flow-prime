@@ -26,35 +26,34 @@ export function KPICard({
     };
 
     const bgClasses = {
-        blue: 'bg-blue-50',
-        green: 'bg-success-50',
-        orange: 'bg-warning-50',
-        purple: 'bg-purple-50',
+        blue: 'bg-blue-50 dark:bg-blue-950/50',
+        green: 'bg-success-50 dark:bg-green-950/50',
+        orange: 'bg-warning-50 dark:bg-orange-950/50',
+        purple: 'bg-purple-50 dark:bg-purple-950/50',
+    };
+
+    const iconColorClasses = {
+        blue: 'text-blue-600 dark:text-blue-400',
+        green: 'text-success-600 dark:text-green-400',
+        orange: 'text-warning-600 dark:text-orange-400',
+        purple: 'text-ai-purple dark:text-purple-400',
     };
 
     return (
-        <Card className="relative overflow-hidden group hover:scale-105 transform transition-all duration-300 hover:shadow-lg">
+        <Card className="relative overflow-hidden group hover:scale-105 transform transition-all duration-300 hover:shadow-lg dark:hover:shadow-blue-500/20">
             <CardContent className="p-6">
                 <div className="flex items-center justify-between mb-4">
                     <div
                         className={`w-12 h-12 rounded-xl ${bgClasses[color]} flex items-center justify-center group-hover:scale-110 transition-transform duration-300`}>
                         <Icon
-                            className={`w-6 h-6 ${
-                                color === 'blue'
-                                    ? 'text-blue-600'
-                                    : color === 'green'
-                                    ? 'text-success-600'
-                                    : color === 'orange'
-                                    ? 'text-warning-600'
-                                    : 'text-ai-purple'
-                            }`}
+                            className={`w-6 h-6 ${iconColorClasses[color]}`}
                         />
                     </div>
                     <div
                         className={`px-3 py-1 rounded-full text-xs font-semibold ${
                             trend === 'up'
-                                ? 'bg-success-100 text-success-700'
-                                : 'bg-red-100 text-red-700'
+                                ? 'bg-success-100 dark:bg-green-950/50 text-success-700 dark:text-green-400'
+                                : 'bg-red-100 dark:bg-red-950/50 text-red-700 dark:text-red-400'
                         }`}>
                         {trend === 'up' ? '+' : ''}
                         {change}%
@@ -62,15 +61,17 @@ export function KPICard({
                 </div>
 
                 <div>
-                    <h3 className="text-2xl font-bold text-gray-900 mb-1">
+                    <h3 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-1">
                         {value}
                     </h3>
-                    <p className="text-sm text-gray-600 font-medium">{title}</p>
+                    <p className="text-sm text-gray-600 dark:text-gray-400 font-medium">
+                        {title}
+                    </p>
                 </div>
 
                 {/* Animated background glow effect */}
                 <div
-                    className={`absolute inset-0 rounded-xl bg-gradient-to-r ${colorClasses[color]} opacity-0 group-hover:opacity-10 transition-opacity duration-300 -z-10`}
+                    className={`absolute inset-0 rounded-xl bg-gradient-to-r ${colorClasses[color]} opacity-0 group-hover:opacity-10 dark:group-hover:opacity-20 transition-opacity duration-300 -z-10`}
                 />
             </CardContent>
         </Card>

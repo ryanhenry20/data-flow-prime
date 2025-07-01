@@ -88,10 +88,10 @@ export default function HomePage() {
                 {/* Header */}
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                     <div>
-                        <h1 className="text-3xl font-bold text-neutral-900">
+                        <h1 className="text-3xl font-bold text-neutral-900 dark:text-neutral-100">
                             Analytics Dashboard
                         </h1>
-                        <p className="text-neutral-600 mt-1">
+                        <p className="text-neutral-600 dark:text-neutral-400 mt-1">
                             Welcome back! Here&apos;s what&apos;s happening with
                             your business today.
                         </p>
