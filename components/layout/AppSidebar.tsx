@@ -14,6 +14,7 @@ import {
     Calendar,
     Search,
     Star,
+    Grid3X3,
 } from 'lucide-react';
 
 import {
@@ -33,6 +34,7 @@ const navigationItems = [
     { title: 'Analytics', url: '/analytics', icon: TrendingUp },
     { title: 'Reports', url: '/reports', icon: FileText },
     { title: 'Users', url: '/users', icon: Users },
+    { title: 'Widget Marketplace', url: '/widgets', icon: Grid3X3 },
 ];
 
 const aiFeatures = [

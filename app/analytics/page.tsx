@@ -1,3 +1,5 @@
+'use client';
+
 import { Layout } from '@/components/layout/Layout';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { AnalyticsEventsTable } from '@/components/analytics/AnalyticsEventsTable';
