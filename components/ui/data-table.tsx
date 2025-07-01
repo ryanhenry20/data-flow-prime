@@ -57,6 +57,7 @@ interface DataTableProps<TData, TValue> {
     showColumnVisibility?: boolean;
     showExport?: boolean;
     onExport?: (data: TData[]) => void;
+    onPDFExport?: (data: TData[]) => void | Promise<void>;
     className?: string;
 }
 
