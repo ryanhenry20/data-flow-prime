@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
+import { handleApiError } from '@/lib/error-handler';
 
 interface AnalyticsMetric {
     id: string;
@@ -52,9 +53,10 @@ export function useKPIMetrics() {
 
                 setMetrics(data || []);
             } catch (err) {
-                setError(
-                    err instanceof Error ? err.message : 'An error occurred'
-                );
+                const errorMessage =
+                    err instanceof Error ? err.message : 'An error occurred';
+                setError(errorMessage);
+                handleApiError(err, 'fetch KPI metrics');
             } finally {
                 setLoading(false);
             }
@@ -93,9 +95,10 @@ export function useRevenueData() {
 
                 setRevenueData(chartData);
             } catch (err) {
-                setError(
-                    err instanceof Error ? err.message : 'An error occurred'
-                );
+                const errorMessage =
+                    err instanceof Error ? err.message : 'An error occurred';
+                setError(errorMessage);
+                handleApiError(err, 'fetch revenue data');
             } finally {
                 setLoading(false);
             }
@@ -125,9 +128,10 @@ export function useAIInsights() {
                 if (error) throw error;
                 setInsights(data || []);
             } catch (err) {
-                setError(
-                    err instanceof Error ? err.message : 'An error occurred'
-                );
+                const errorMessage =
+                    err instanceof Error ? err.message : 'An error occurred';
+                setError(errorMessage);
+                handleApiError(err, 'fetch AI insights');
             } finally {
                 setLoading(false);
             }
@@ -174,9 +178,10 @@ export function useRealtimeMetrics() {
 
                 setMetrics(data || []);
             } catch (err) {
-                setError(
-                    err instanceof Error ? err.message : 'An error occurred'
-                );
+                const errorMessage =
+                    err instanceof Error ? err.message : 'An error occurred';
+                setError(errorMessage);
+                handleApiError(err, 'fetch realtime metrics');
             } finally {
                 setLoading(false);
             }
@@ -231,9 +236,10 @@ export function useChartData(
 
                 setChartData(transformedData);
             } catch (err) {
-                setError(
-                    err instanceof Error ? err.message : 'An error occurred'
-                );
+                const errorMessage =
+                    err instanceof Error ? err.message : 'An error occurred';
+                setError(errorMessage);
+                handleApiError(err, `fetch ${metricName} chart data`);
             } finally {
                 setLoading(false);
             }
