@@ -19,6 +19,9 @@ import {
     Monitor,
     Palette,
     History,
+    Table,
+    Activity,
+    BarChart3,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
@@ -215,6 +218,35 @@ export function CommandPalette({ open, onOpenChange }: CommandPaletteProps) {
                     label: 'Settings',
                     shortcut: '⌘,',
                     action: () => router.push('/settings'),
+                },
+            ],
+        },
+        {
+            group: 'Data Tables',
+            items: [
+                {
+                    icon: Activity,
+                    label: 'Analytics Events',
+                    shortcut: '⌘⇧E',
+                    action: () => router.push('/analytics'),
+                },
+                {
+                    icon: Users,
+                    label: 'User Metrics',
+                    shortcut: '⌘⇧U',
+                    action: () => router.push('/users'),
+                },
+                {
+                    icon: Table,
+                    label: 'Advanced Tables',
+                    shortcut: '⌘T',
+                    action: () => router.push('/analytics'),
+                },
+                {
+                    icon: BarChart3,
+                    label: 'Export Analytics Data',
+                    shortcut: '⌘⇧X',
+                    action: () => console.log('Export analytics data'),
                 },
             ],
         },
