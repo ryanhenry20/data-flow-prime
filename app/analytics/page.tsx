@@ -26,14 +26,19 @@ import {
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useState } from 'react';
+import { DateRange } from 'react-day-picker';
 
 export default function AnalyticsPage() {
     const [isRefreshing, setIsRefreshing] = useState(false);
-    const [dateRange, setDateRange] = useState({
+    const [dateRange, setDateRange] = useState<DateRange>({
         from: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000), // 30 days ago
         to: new Date(),
     });
-    const [filters, setFilters] = useState({
+    const [filters, setFilters] = useState<{
+        eventTypes: string[];
+        userSegments: string[];
+        sources: string[];
+    }>({
         eventTypes: [],
         userSegments: [],
         sources: [],
@@ -186,11 +191,7 @@ export default function AnalyticsPage() {
                                     advanced filtering and real-time updates.
                                 </p>
                             </div>
-                            <AnalyticsEventsTable
-                                dateRange={dateRange}
-                                filters={filters}
-                                refreshTrigger={isRefreshing}
-                            />
+                            <AnalyticsEventsTable />
                         </div>
                     </TabsContent>
 
@@ -205,11 +206,7 @@ export default function AnalyticsPage() {
                                     scoring and segmentation.
                                 </p>
                             </div>
-                            <UserMetricsTable
-                                dateRange={dateRange}
-                                filters={filters}
-                                refreshTrigger={isRefreshing}
-                            />
+                            <UserMetricsTable />
                         </div>
                     </TabsContent>
                 </Tabs>
