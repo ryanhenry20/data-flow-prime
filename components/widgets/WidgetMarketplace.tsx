@@ -17,6 +17,7 @@ import {
     PieChart,
     Zap,
     Brain,
+    Check,
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -39,6 +40,7 @@ import {
 import { useNotifications } from '@/hooks/useNotifications';
 import { WidgetPreviewModal } from './WidgetPreviewModal';
 import { WidgetFactory } from './WidgetFactory';
+import { useDashboardWidgets } from '@/hooks/useDashboardWidgets';
 
 const categoryIcons = {
     all: Grid3X3,
@@ -74,6 +76,7 @@ export function WidgetMarketplace() {
     const [previewWidget, setPreviewWidget] = useState<Widget | null>(null);
     const [showPreview, setShowPreview] = useState(false);
     const { success: showSuccess } = useNotifications();
+    const { addWidget, isWidgetOnDashboard } = useDashboardWidgets();
 
     // Filter and sort widgets
     const filteredWidgets = useMemo(() => {
@@ -116,9 +119,16 @@ export function WidgetMarketplace() {
     };
 
     const addTodashboard = (widget: Widget) => {
+        if (isWidgetOnDashboard(widget.metadata.id)) {
+            showSuccess(
+                `${widget.metadata.name} is already on your dashboard!`
+            );
+            return;
+        }
+
+        addWidget(widget);
         showSuccess(`${widget.metadata.name} added to dashboard!`);
         setShowPreview(false);
-        // TODO: Implement actual dashboard integration
     };
 
     const openPreview = (widget: Widget) => {
@@ -129,6 +139,7 @@ export function WidgetMarketplace() {
     const renderWidgetCard = (widget: Widget) => {
         const IconComponent = categoryIcons[widget.metadata.category];
         const isFavorite = favorites.has(widget.metadata.id);
+        const isOnDashboard = isWidgetOnDashboard(widget.metadata.id);
 
         return (
             <Card
@@ -228,9 +239,20 @@ export function WidgetMarketplace() {
                         <Button
                             onClick={() => addTodashboard(widget)}
                             className="flex-1"
-                            size="sm">
-                            <Plus className="w-4 h-4 mr-2" />
-                            Add to Dashboard
+                            size="sm"
+                            variant={isOnDashboard ? 'secondary' : 'default'}
+                            disabled={isOnDashboard}>
+                            {isOnDashboard ? (
+                                <>
+                                    <Check className="w-4 h-4 mr-2" />
+                                    Added
+                                </>
+                            ) : (
+                                <>
+                                    <Plus className="w-4 h-4 mr-2" />
+                                    Add to Dashboard
+                                </>
+                            )}
                         </Button>
                         <Button
                             variant="outline"

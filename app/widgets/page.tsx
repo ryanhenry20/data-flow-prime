@@ -1,11 +1,12 @@
 'use client';
 
 import { WidgetMarketplace } from '@/components/widgets';
+import { Layout } from '@/components/layout/Layout';
 
 export default function WidgetsPage() {
     return (
-        <div className="flex-1 space-y-4 p-4 md:p-8 pt-6">
+        <Layout>
             <WidgetMarketplace />
-        </div>
+        </Layout>
     );
 }

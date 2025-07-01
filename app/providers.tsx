@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ThemeProvider } from '@/components/providers/theme-provider';
+import { DashboardWidgetsProvider } from '@/hooks/useDashboardWidgets';
 
 export function ReactQueryProvider({
     children,
@@ -18,7 +19,7 @@ export function ReactQueryProvider({
                 defaultTheme="system"
                 enableSystem
                 disableTransitionOnChange>
-                {children}
+                <DashboardWidgetsProvider>{children}</DashboardWidgetsProvider>
             </ThemeProvider>
         </QueryClientProvider>
     );

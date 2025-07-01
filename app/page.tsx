@@ -15,6 +15,7 @@ import { ChartCard } from '@/components/dashboard/ChartCard';
 import { AIInsightsPanel } from '@/components/dashboard/AIInsightsPanel';
 import { RealtimeMetrics } from '@/components/dashboard/RealtimeMetrics';
 import { Layout } from '@/components/layout/Layout';
+import { DashboardWidgets } from '@/components/dashboard/DashboardWidgets';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
@@ -250,6 +251,9 @@ export default function HomePage() {
                         </Card>
                     </div>
                 </div>
+
+                {/* Dashboard Widgets Section */}
+                <DashboardWidgets />
             </div>
         </Layout>
     );
