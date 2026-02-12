@@ -22,7 +22,19 @@ import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Progress } from '@/components/ui/progress';
 import { useNotifications } from '@/hooks/useNotifications';
-import { supabase } from '@/lib/supabase';
+import type { AggregatedUserMetric } from '@/lib/portfolio-types';
+import { portfolioClient } from '@/lib/portfolio-client';
+import { Button } from '@/components/ui/button';
+import {
+    Dialog,
+    DialogContent,
+    DialogHeader,
+    DialogTitle,
+    DialogFooter,
+} from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { useRouter } from 'next/navigation';
 
 interface UserMetric {
     id: string;
@@ -40,28 +52,13 @@ interface UserMetric {
     };
 }
 
-interface AggregatedUserMetric {
-    user_id: string;
-    user_profiles: {
-        id: string;
-        email: string;
-        full_name: string;
-        avatar_url?: string;
-        created_at: string;
-    };
-    total_sessions: number;
-    avg_session_duration: number;
-    page_views: number;
-    conversion_rate: number;
-    last_active: string;
-    engagement_score: number;
-    user_segment: 'high' | 'medium' | 'low';
-}
-
 export function UserMetricsTable() {
     const [data, setData] = React.useState<AggregatedUserMetric[]>([]);
     const [loading, setLoading] = React.useState(true);
+    const [viewUser, setViewUser] = React.useState<AggregatedUserMetric | null>(null);
+    const [editUser, setEditUser] = React.useState<AggregatedUserMetric | null>(null);
     const { error: showError, success: showSuccess } = useNotifications();
+    const router = useRouter();
 
     React.useEffect(() => {
         fetchUserMetrics();
@@ -70,45 +67,7 @@ export function UserMetricsTable() {
     const fetchUserMetrics = async () => {
         try {
             setLoading(true);
-
-            // Fetch aggregated user metrics
-            const { data: metrics, error } = await supabase
-                .rpc('get_user_analytics_summary')
-                .limit(100);
-
-            if (error) {
-                // Fallback: fetch basic user data if RPC doesn't exist
-                const { data: users, error: userError } = await supabase
-                    .from('user_profiles')
-                    .select('*')
-                    .order('created_at', { ascending: false })
-                    .limit(50);
-
-                if (userError) throw userError;
-
-                // Create mock aggregated data for demo
-                const mockMetrics =
-                    users?.map((user) => ({
-                        user_id: user.id,
-                        user_profiles: user,
-                        total_sessions: Math.floor(Math.random() * 100) + 1,
-                        avg_session_duration:
-                            Math.floor(Math.random() * 300) + 60, // 1-5 minutes
-                        page_views: Math.floor(Math.random() * 500) + 10,
-                        conversion_rate: Math.random() * 10, // 0-10%
-                        last_active: new Date(
-                            Date.now() - Math.random() * 7 * 24 * 60 * 60 * 1000
-                        ).toISOString(),
-                        engagement_score: Math.floor(Math.random() * 100),
-                        user_segment: ['high', 'medium', 'low'][
-                            Math.floor(Math.random() * 3)
-                        ] as 'high' | 'medium' | 'low',
-                    })) || [];
-
-                setData(mockMetrics);
-                return;
-            }
-
+            const metrics = await portfolioClient.getUserMetrics(100);
             setData(metrics || []);
         } catch (error) {
             console.error('Error fetching user metrics:', error);
@@ -317,21 +276,21 @@ export function UserMetricsTable() {
                         label: 'View Profile',
                         icon: <Eye className="h-4 w-4" />,
                         onClick: (row: any) => {
-                            showSuccess('User profile (feature coming soon)');
+                            setViewUser(user);
                         },
                     },
                     {
                         label: 'Edit User',
                         icon: <Edit className="h-4 w-4" />,
                         onClick: (row: any) => {
-                            showSuccess('Edit user (feature coming soon)');
+                            setEditUser(user);
                         },
                     },
                     {
                         label: 'View Analytics',
                         icon: <TrendingUp className="h-4 w-4" />,
                         onClick: (row: any) => {
-                            showSuccess('User analytics (feature coming soon)');
+                            router.push('/analytics');
                         },
                     },
                 ];
@@ -399,15 +358,122 @@ export function UserMetricsTable() {
         );
     }
 
+    const saveUserEdit = () => {
+        if (!editUser) return;
+        setData((prev) =>
+            prev.map((item) =>
+                item.user_id === editUser.user_id ? editUser : item
+            )
+        );
+        setEditUser(null);
+        showSuccess('User record updated');
+    };
+
     return (
-        <DataTable
-            columns={columns}
-            data={data}
-            title="User Metrics"
-            description="Comprehensive user analytics and engagement metrics"
-            searchKey="user_profiles"
-            searchPlaceholder="Search users by name or email..."
-            onExport={handleExport}
-        />
+        <>
+            <DataTable
+                columns={columns}
+                data={data}
+                title="User Metrics"
+                description="Comprehensive user analytics and engagement metrics"
+                searchKey="user_profiles"
+                searchPlaceholder="Search users by name or email..."
+                onExport={handleExport}
+            />
+
+            <Dialog open={!!viewUser} onOpenChange={() => setViewUser(null)}>
+                <DialogContent>
+                    <DialogHeader>
+                        <DialogTitle>User Profile</DialogTitle>
+                    </DialogHeader>
+                    {viewUser && (
+                        <div className="space-y-2 text-sm">
+                            <div>
+                                <span className="font-medium">Name:</span>{' '}
+                                {viewUser.user_profiles.full_name}
+                            </div>
+                            <div>
+                                <span className="font-medium">Email:</span>{' '}
+                                {viewUser.user_profiles.email}
+                            </div>
+                            <div>
+                                <span className="font-medium">Sessions:</span>{' '}
+                                {viewUser.total_sessions}
+                            </div>
+                            <div>
+                                <span className="font-medium">Engagement:</span>{' '}
+                                {viewUser.engagement_score}/100
+                            </div>
+                            <div>
+                                <span className="font-medium">Last Active:</span>{' '}
+                                {new Date(viewUser.last_active).toLocaleString()}
+                            </div>
+                        </div>
+                    )}
+                </DialogContent>
+            </Dialog>
+
+            <Dialog open={!!editUser} onOpenChange={() => setEditUser(null)}>
+                <DialogContent>
+                    <DialogHeader>
+                        <DialogTitle>Edit User Segment</DialogTitle>
+                    </DialogHeader>
+                    {editUser && (
+                        <div className="space-y-3">
+                            <Input
+                                value={editUser.user_profiles.full_name}
+                                onChange={(event) =>
+                                    setEditUser((prev) =>
+                                        prev
+                                            ? {
+                                                  ...prev,
+                                                  user_profiles: {
+                                                      ...prev.user_profiles,
+                                                      full_name:
+                                                          event.target.value,
+                                                  },
+                                              }
+                                            : prev
+                                    )
+                                }
+                                placeholder="Full name"
+                            />
+                            <Select
+                                value={editUser.user_segment}
+                                onValueChange={(value) =>
+                                    setEditUser((prev) =>
+                                        prev
+                                            ? {
+                                                  ...prev,
+                                                  user_segment: value as
+                                                      | 'high'
+                                                      | 'medium'
+                                                      | 'low',
+                                              }
+                                            : prev
+                                    )
+                                }>
+                                <SelectTrigger>
+                                    <SelectValue placeholder="Select segment" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="high">High Value</SelectItem>
+                                    <SelectItem value="medium">
+                                        Medium Value
+                                    </SelectItem>
+                                    <SelectItem value="low">Low Value</SelectItem>
+                                </SelectContent>
+                            </Select>
+                        </div>
+                    )}
+                    <DialogFooter>
+                        <Button variant="outline" onClick={() => setEditUser(null)}>
+                            Cancel
+                        </Button>
+                        <Button onClick={saveUserEdit}>Save Changes</Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
+        </>
     );
 }

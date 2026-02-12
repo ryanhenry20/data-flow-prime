@@ -5,6 +5,7 @@ import React, {
     useContext,
     useState,
     useCallback,
+    useEffect,
     ReactNode,
 } from 'react';
 import { Widget } from '@/components/widgets/types';
@@ -31,6 +32,39 @@ const DashboardWidgetsContext = createContext<
     DashboardWidgetsContextType | undefined
 >(undefined);
 
+const DASHBOARD_WIDGETS_STORAGE_KEY = 'data-flow-prime.dashboard-widgets.v1';
+
+function isValidDashboardWidget(value: unknown): value is DashboardWidget {
+    if (!value || typeof value !== 'object') return false;
+
+    const candidate = value as Partial<DashboardWidget>;
+    return (
+        typeof candidate.id === 'string' &&
+        typeof candidate.widgetId === 'string' &&
+        !!candidate.position &&
+        typeof candidate.position.x === 'number' &&
+        typeof candidate.position.y === 'number' &&
+        typeof candidate.position.w === 'number' &&
+        typeof candidate.position.h === 'number'
+    );
+}
+
+function loadPersistedWidgets(): DashboardWidget[] {
+    if (typeof window === 'undefined') return [];
+
+    try {
+        const raw = window.localStorage.getItem(DASHBOARD_WIDGETS_STORAGE_KEY);
+        if (!raw) return [];
+
+        const parsed = JSON.parse(raw);
+        if (!Array.isArray(parsed)) return [];
+
+        return parsed.filter(isValidDashboardWidget);
+    } catch {
+        return [];
+    }
+}
+
 export function DashboardWidgetsProvider({
     children,
 }: {
@@ -39,6 +73,21 @@ export function DashboardWidgetsProvider({
     const [dashboardWidgets, setDashboardWidgets] = useState<DashboardWidget[]>(
         []
     );
+    const [isHydrated, setIsHydrated] = useState(false);
+
+    useEffect(() => {
+        setDashboardWidgets(loadPersistedWidgets());
+        setIsHydrated(true);
+    }, []);
+
+    useEffect(() => {
+        if (!isHydrated || typeof window === 'undefined') return;
+
+        window.localStorage.setItem(
+            DASHBOARD_WIDGETS_STORAGE_KEY,
+            JSON.stringify(dashboardWidgets)
+        );
+    }, [dashboardWidgets, isHydrated]);
 
     const addWidget = useCallback(
         (

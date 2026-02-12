@@ -6,10 +6,14 @@
         "dev": "next dev",
         "build": "next build",
         "start": "next start",
-        "lint": "next lint"
+        "lint": "next lint",
+        "db:generate": "prisma generate",
+        "db:push": "prisma db push",
+        "db:studio": "prisma studio"
     },
     "dependencies": {
         "@hookform/resolvers": "^3.9.0",
+        "@prisma/client": "^6.4.1",
         "@radix-ui/react-accordion": "^1.2.0",
         "@radix-ui/react-alert-dialog": "^1.1.1",
         "@radix-ui/react-aspect-ratio": "^1.1.0",
@@ -38,7 +42,6 @@
         "@radix-ui/react-toggle-group": "^1.1.0",
         "@radix-ui/react-tooltip": "^1.1.4",
         "@react-pdf/renderer": "^4.3.0",
-        "@supabase/supabase-js": "^2.50.2",
         "@tanstack/react-query": "^5.56.2",
         "@tanstack/react-table": "^8.21.3",
         "@tanstack/table-core": "^8.21.3",
@@ -71,7 +74,9 @@
         "autoprefixer": "^10.4.20",
         "eslint": "^8.57.1",
         "eslint-config-next": "^14.2.15",
+        "playwright": "^1.58.2",
         "postcss": "^8.4.47",
+        "prisma": "^6.4.1",
         "tailwindcss": "^3.4.11",
         "typescript": "^5.5.3"
     }

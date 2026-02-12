@@ -1,6 +1,6 @@
 # Data Flow Prime
 
-A modern analytics dashboard built with Next.js, React, and Tailwind CSS.
+A modern analytics dashboard built with Next.js, React, Tailwind CSS, and a local Prisma + SQLite backend.
 
 ## Features
 
@@ -12,6 +12,7 @@ A modern analytics dashboard built with Next.js, React, and Tailwind CSS.
 -   🎭 Tailwind CSS for styling
 -   📈 Chart.js integration for data visualization
 -   🔍 Command palette for quick navigation
+-   🗃️ Persistent local backend with Prisma + SQLite APIs
 
 ## Tech Stack
 
@@ -22,6 +23,7 @@ A modern analytics dashboard built with Next.js, React, and Tailwind CSS.
 -   **Charts**: Recharts
 -   **Icons**: Lucide React
 -   **State Management**: TanStack Query
+-   **Backend/Data**: Next.js API routes + Prisma + SQLite
 
 ## Getting Started
 
@@ -45,7 +47,19 @@ cd data-flow-prime
 npm install
 ```
 
-3. Start the development server:
+3. Configure environment:
+
+```bash
+cp .env.example .env.local
+```
+
+4. (Optional) Generate Prisma client manually:
+
+```bash
+npm run db:generate
+```
+
+5. Start the development server:
 
 ```bash
 npm run dev
@@ -59,6 +73,9 @@ npm run dev
 -   `npm run build` - Build for production
 -   `npm run start` - Start production server
 -   `npm run lint` - Run ESLint
+-   `npm run db:generate` - Generate Prisma client
+-   `npm run db:push` - Push schema to SQLite database
+-   `npm run db:studio` - Open Prisma Studio
 
 ## Project Structure
 

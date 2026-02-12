@@ -160,10 +160,10 @@ export default function HomePage() {
                     />
                 </div>
 
-                {/* Main Content Grid */}
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                    {/* Left Column - Charts */}
-                    <div className="lg:col-span-2 space-y-8">
+                {/* Main Content Columns */}
+                <div className="flex flex-col lg:flex-row gap-8 items-start">
+                    {/* Left Column - Charts + Widgets */}
+                    <div className="flex-1 min-w-0 space-y-8">
                         {/* Revenue Chart - Using Real Data */}
                         {revenueLoading ? (
                             <Card className="chart-container">
@@ -211,10 +211,13 @@ export default function HomePage() {
                             height={300}
                             color="#f59e0b"
                         />
+
+                        {/* Dashboard Widgets Section */}
+                        <DashboardWidgets />
                     </div>
 
                     {/* Right Column - AI Insights & Metrics */}
-                    <div className="space-y-8">
+                    <div className="w-full lg:w-[360px] xl:w-[380px] space-y-8">
                         <AIInsightsPanel />
                         <RealtimeMetrics />
 
@@ -251,9 +254,6 @@ export default function HomePage() {
                         </Card>
                     </div>
                 </div>
-
-                {/* Dashboard Widgets Section */}
-                <DashboardWidgets />
             </div>
         </Layout>
     );

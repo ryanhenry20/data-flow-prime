@@ -1,32 +1,15 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { supabase } from '@/lib/supabase';
+import { useEffect, useState } from 'react';
 import { handleApiError } from '@/lib/error-handler';
-
-interface AnalyticsMetric {
-    id: string;
-    metric_name: string;
-    value: string | number;
-    dimensions: Record<string, any>;
-    timestamp: string;
-}
-
-interface AIInsight {
-    id: string;
-    type: string;
-    title: string;
-    description: string;
-    confidence: number;
-    impact_level: string;
-    created_at: string;
-}
+import { portfolioClient } from '@/lib/portfolio-client';
+import type { AIInsight, AnalyticsMetric } from '@/lib/portfolio-types';
 
 // Helper function to safely parse numeric values
 const parseNumericValue = (value: string | number): number => {
     if (typeof value === 'number') return value;
     const parsed = parseFloat(value.toString());
-    return isNaN(parsed) ? 0 : parsed;
+    return Number.isNaN(parsed) ? 0 : parsed;
 };
 
 // Hook for fetching KPI metrics
@@ -38,20 +21,16 @@ export function useKPIMetrics() {
     useEffect(() => {
         async function fetchKPIMetrics() {
             try {
-                const { data, error } = await supabase
-                    .from('analytics_metrics')
-                    .select('*')
-                    .in('metric_name', [
+                const data = await portfolioClient.getKPIMetrics();
+                const filtered = data.filter((metric) =>
+                    [
                         'active_users',
                         'conversion_rate',
                         'avg_session_duration',
                         'live_users',
-                    ])
-                    .order('timestamp', { ascending: false });
-
-                if (error) throw error;
-
-                setMetrics(data || []);
+                    ].includes(metric.metric_name)
+                );
+                setMetrics(filtered);
             } catch (err) {
                 const errorMessage =
                     err instanceof Error ? err.message : 'An error occurred';
@@ -77,15 +56,8 @@ export function useRevenueData() {
     useEffect(() => {
         async function fetchRevenueData() {
             try {
-                const { data, error } = await supabase
-                    .from('analytics_metrics')
-                    .select('*')
-                    .eq('metric_name', 'total_revenue')
-                    .order('timestamp', { ascending: true });
+                const data = await portfolioClient.getRevenueMetrics();
 
-                if (error) throw error;
-
-                // Transform data for charts with proper number parsing
                 const chartData =
                     data?.map((item) => ({
                         name:
@@ -117,15 +89,11 @@ export function useAIInsights() {
     const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
+        let intervalId: ReturnType<typeof setInterval> | undefined;
+
         async function fetchAIInsights() {
             try {
-                const { data, error } = await supabase
-                    .from('ai_insights')
-                    .select('*')
-                    .order('created_at', { ascending: false })
-                    .limit(10);
-
-                if (error) throw error;
+                const data = await portfolioClient.getAIInsights();
                 setInsights(data || []);
             } catch (err) {
                 const errorMessage =
@@ -138,21 +106,10 @@ export function useAIInsights() {
         }
 
         fetchAIInsights();
-
-        // Set up real-time subscription
-        const subscription = supabase
-            .channel('ai_insights_changes')
-            .on(
-                'postgres_changes',
-                { event: '*', schema: 'public', table: 'ai_insights' },
-                () => {
-                    fetchAIInsights();
-                }
-            )
-            .subscribe();
+        intervalId = setInterval(fetchAIInsights, 12000);
 
         return () => {
-            subscription.unsubscribe();
+            if (intervalId) clearInterval(intervalId);
         };
     }, []);
 
@@ -166,16 +123,11 @@ export function useRealtimeMetrics() {
     const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
+        let intervalId: ReturnType<typeof setInterval> | undefined;
+
         async function fetchRealtimeMetrics() {
             try {
-                const { data, error } = await supabase
-                    .from('analytics_metrics')
-                    .select('*')
-                    .in('metric_name', ['live_users', 'live_page_views'])
-                    .order('timestamp', { ascending: false });
-
-                if (error) throw error;
-
+                const data = await portfolioClient.getRealtimeMetrics();
                 setMetrics(data || []);
             } catch (err) {
                 const errorMessage =
@@ -188,21 +140,10 @@ export function useRealtimeMetrics() {
         }
 
         fetchRealtimeMetrics();
-
-        // Set up real-time subscription for live metrics
-        const subscription = supabase
-            .channel('realtime_metrics')
-            .on(
-                'postgres_changes',
-                { event: '*', schema: 'public', table: 'analytics_metrics' },
-                () => {
-                    fetchRealtimeMetrics();
-                }
-            )
-            .subscribe();
+        intervalId = setInterval(fetchRealtimeMetrics, 7000);
 
         return () => {
-            subscription.unsubscribe();
+            if (intervalId) clearInterval(intervalId);
         };
     }, []);
 
@@ -221,15 +162,9 @@ export function useChartData(
     useEffect(() => {
         async function fetchChartData() {
             try {
-                const { data, error } = await supabase
-                    .from('analytics_metrics')
-                    .select('*')
-                    .eq('metric_name', metricName)
-                    .order('timestamp', { ascending: true });
+                const data = await portfolioClient.getChartMetrics(metricName);
 
-                if (error) throw error;
-
-                let transformedData = data || [];
+                let transformedData: any[] = data || [];
                 if (transformFn) {
                     transformedData = transformFn(data || []);
                 }

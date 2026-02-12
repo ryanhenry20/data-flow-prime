@@ -1,0 +1,67 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model UserProfile {
+  id        String          @id
+  email     String          @unique
+  fullName  String
+  avatarUrl String?
+  createdAt DateTime        @default(now())
+  events    AnalyticsEvent[]
+
+  @@map("user_profiles")
+}
+
+model AnalyticsEvent {
+  id         String      @id
+  userId     String
+  user       UserProfile @relation(fields: [userId], references: [id], onDelete: Cascade)
+  eventType  String
+  properties Json
+  timestamp  DateTime
+  sessionId  String?
+  userAgent  String?
+  ipAddress  String?
+  pageUrl    String?
+  referrer   String?
+
+  @@index([timestamp])
+  @@index([userId])
+  @@map("analytics_events")
+}
+
+model SmartAlert {
+  id             String   @id
+  title          String
+  description    String
+  severity       String
+  status         String
+  source         String
+  createdAt      DateTime
+  recommendation String
+  affectedMetric String?
+
+  @@index([status, createdAt])
+  @@map("smart_alerts")
+}
+
+model CalendarEntry {
+  id        String   @id
+  title     String
+  type      String
+  owner     String
+  date      DateTime
+  startTime String
+  endTime   String
+  attendees Int
+  status    String
+
+  @@index([date])
+  @@map("calendar_entries")
+}

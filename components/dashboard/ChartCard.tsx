@@ -1,5 +1,6 @@
 'use client';
 
+import { useId } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
     LineChart,
@@ -42,6 +43,7 @@ export function ChartCard({
     height = 300,
     color = '#3b82f6',
 }: ChartCardProps) {
+    const gradientId = useId().replace(/:/g, '');
     const renderChart = () => {
         switch (type) {
             case 'line':
@@ -72,6 +74,7 @@ export function ChartCard({
                             dataKey="value"
                             stroke={color}
                             strokeWidth={3}
+                            isAnimationActive={false}
                             dot={{ fill: color, strokeWidth: 2, r: 4 }}
                             activeDot={{ r: 6, fill: color }}
                         />
@@ -81,6 +84,25 @@ export function ChartCard({
             case 'area':
                 return (
                     <AreaChart data={data}>
+                        <defs>
+                            <linearGradient
+                                id={`chart-gradient-${gradientId}`}
+                                x1="0"
+                                y1="0"
+                                x2="0"
+                                y2="1">
+                                <stop
+                                    offset="5%"
+                                    stopColor={color}
+                                    stopOpacity={0.35}
+                                />
+                                <stop
+                                    offset="95%"
+                                    stopColor={color}
+                                    stopOpacity={0.05}
+                                />
+                            </linearGradient>
+                        </defs>
                         <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
                         <XAxis
                             dataKey="name"
@@ -105,8 +127,9 @@ export function ChartCard({
                             type="monotone"
                             dataKey="value"
                             stroke={color}
-                            fill={`${color}20`}
+                            fill={`url(#chart-gradient-${gradientId})`}
                             strokeWidth={2}
+                            isAnimationActive={false}
                         />
                     </AreaChart>
                 );
@@ -138,6 +161,7 @@ export function ChartCard({
                             dataKey="value"
                             fill={color}
                             radius={[4, 4, 0, 0]}
+                            isAnimationActive={false}
                         />
                     </BarChart>
                 );

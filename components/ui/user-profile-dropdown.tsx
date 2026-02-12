@@ -24,6 +24,8 @@ import {
     DropdownMenuShortcut,
     DropdownMenuGroup,
 } from '@/components/ui/dropdown-menu';
+import { useRouter } from 'next/navigation';
+import { useNotifications } from '@/hooks/useNotifications';
 
 interface UserProfileDropdownProps {
     user?: {
@@ -35,6 +37,8 @@ interface UserProfileDropdownProps {
 }
 
 export function UserProfileDropdown({ user }: UserProfileDropdownProps) {
+    const router = useRouter();
+    const { info, success } = useNotifications();
     // Default user data for now
     const currentUser = user || {
         name: 'John Doe',
@@ -43,8 +47,37 @@ export function UserProfileDropdown({ user }: UserProfileDropdownProps) {
     };
 
     const handleAction = (action: string) => {
-        console.log(`Action: ${action}`);
-        // TODO: Implement actual actions
+        switch (action) {
+            case 'profile':
+                router.push('/users');
+                break;
+            case 'billing':
+                info('Billing workspace can be connected here.');
+                break;
+            case 'settings':
+                router.push('/settings');
+                break;
+            case 'notifications':
+                router.push('/alerts');
+                break;
+            case 'customize':
+                router.push('/widgets');
+                break;
+            case 'shortcuts':
+                info('Press Cmd/Ctrl + K to open command palette.');
+                break;
+            case 'security':
+                info('Security center can be added in Settings.');
+                break;
+            case 'help':
+                info('Open /search and type "help" to find support docs.');
+                break;
+            case 'logout':
+                success('Session ended locally.');
+                break;
+            default:
+                break;
+        }
     };
 
     return (

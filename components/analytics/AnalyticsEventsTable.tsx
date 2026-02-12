@@ -3,7 +3,7 @@
 import * as React from 'react';
 import { ColumnDef } from '@tanstack/react-table';
 import { format } from 'date-fns';
-import { Eye, Edit, Trash2, MoreHorizontal } from 'lucide-react';
+import { Eye, Edit, Trash2 } from 'lucide-react';
 
 import {
     DataTable,
@@ -14,32 +14,25 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useNotifications } from '@/hooks/useNotifications';
-import { supabase } from '@/lib/supabase';
 import { usePDFExport } from '@/components/export/PDFTemplate';
+import { Button } from '@/components/ui/button';
+import { portfolioClient } from '@/lib/portfolio-client';
+import type {
+    AnalyticsEvent,
+    EnrichedAnalyticsEvent,
+    UserProfile,
+} from '@/lib/portfolio-types';
+import {
+    Dialog,
+    DialogContent,
+    DialogHeader,
+    DialogTitle,
+    DialogFooter,
+} from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
 
-interface AnalyticsEvent {
-    id: string;
-    user_id: string;
-    event_type: string;
-    properties: Record<string, any>;
-    timestamp: string;
-    session_id?: string;
-    user_agent?: string;
-    ip_address?: string;
-    page_url?: string;
-    referrer?: string;
-}
-
-interface User {
-    id: string;
-    email: string;
-    full_name: string;
-    avatar_url?: string;
-}
-
-interface EnrichedAnalyticsEvent extends AnalyticsEvent {
-    user?: User;
-}
+interface User extends UserProfile {}
 
 const eventTypeColors = {
     page_view: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300',
@@ -57,6 +50,9 @@ const eventTypeColors = {
 export function AnalyticsEventsTable() {
     const [data, setData] = React.useState<EnrichedAnalyticsEvent[]>([]);
     const [loading, setLoading] = React.useState(true);
+    const [viewEvent, setViewEvent] = React.useState<EnrichedAnalyticsEvent | null>(null);
+    const [editEvent, setEditEvent] = React.useState<EnrichedAnalyticsEvent | null>(null);
+    const [editProperties, setEditProperties] = React.useState('');
     const { error: showError, success: showSuccess } = useNotifications();
     const { generatePDF } = usePDFExport();
 
@@ -67,34 +63,8 @@ export function AnalyticsEventsTable() {
     const fetchEvents = async () => {
         try {
             setLoading(true);
-
-            // Fetch analytics events with user data
-            const { data: events, error } = await supabase
-                .from('analytics_events')
-                .select(
-                    `
-                    *,
-                    user_profiles!inner(
-                        id,
-                        email,
-                        full_name,
-                        avatar_url
-                    )
-                `
-                )
-                .order('timestamp', { ascending: false })
-                .limit(100);
-
-            if (error) throw error;
-
-            // Transform the data to match our interface
-            const enrichedEvents =
-                events?.map((event) => ({
-                    ...event,
-                    user: event.user_profiles,
-                })) || [];
-
-            setData(enrichedEvents);
+            const events = await portfolioClient.getEvents(100);
+            setData(events || []);
         } catch (error) {
             console.error('Error fetching events:', error);
             showError('Failed to load analytics events');
@@ -261,16 +231,17 @@ export function AnalyticsEventsTable() {
                         label: 'View Details',
                         icon: <Eye className="h-4 w-4" />,
                         onClick: (row: any) => {
-                            // TODO: Open details modal
-                            showSuccess('Event details (feature coming soon)');
+                            setViewEvent(event);
                         },
                     },
                     {
                         label: 'Edit Event',
                         icon: <Edit className="h-4 w-4" />,
                         onClick: (row: any) => {
-                            // TODO: Open edit modal
-                            showSuccess('Edit event (feature coming soon)');
+                            setEditEvent(event);
+                            setEditProperties(
+                                JSON.stringify(event.properties || {}, null, 2)
+                            );
                         },
                     },
                     {
@@ -279,13 +250,7 @@ export function AnalyticsEventsTable() {
                         variant: 'destructive' as const,
                         onClick: async (row: any) => {
                             try {
-                                const { error } = await supabase
-                                    .from('analytics_events')
-                                    .delete()
-                                    .eq('id', event.id);
-
-                                if (error) throw error;
-
+                                await portfolioClient.deleteEvent(event.id);
                                 showSuccess('Event deleted successfully');
                                 fetchEvents(); // Refresh the data
                             } catch (error) {
@@ -441,16 +406,132 @@ export function AnalyticsEventsTable() {
         );
     }
 
+    const handleSaveEdit = async () => {
+        if (!editEvent) return;
+
+        try {
+            let parsedProperties: Record<string, any> = {};
+            if (editProperties.trim()) {
+                parsedProperties = JSON.parse(editProperties);
+            }
+
+            const updated = await portfolioClient.updateEvent(editEvent.id, {
+                event_type: editEvent.event_type,
+                page_url: editEvent.page_url,
+                session_id: editEvent.session_id,
+                properties: parsedProperties,
+            });
+
+            if (!updated) {
+                showError('Failed to update event');
+                return;
+            }
+
+            showSuccess('Event updated successfully');
+            setEditEvent(null);
+            fetchEvents();
+        } catch {
+            showError('Invalid JSON in properties field');
+        }
+    };
+
     return (
-        <DataTable
-            columns={columns}
-            data={data}
-            title="Analytics Events"
-            description="Real-time user interaction events and analytics data"
-            searchKey="event_type"
-            searchPlaceholder="Filter by event type..."
-            onExport={handleExport}
-            onPDFExport={handlePDFExport}
-        />
+        <>
+            <DataTable
+                columns={columns}
+                data={data}
+                title="Analytics Events"
+                description="Real-time user interaction events and analytics data"
+                searchKey="event_type"
+                searchPlaceholder="Filter by event type..."
+                onExport={handleExport}
+                onPDFExport={handlePDFExport}
+            />
+
+            <Dialog open={!!viewEvent} onOpenChange={() => setViewEvent(null)}>
+                <DialogContent>
+                    <DialogHeader>
+                        <DialogTitle>Event Details</DialogTitle>
+                    </DialogHeader>
+                    {viewEvent && (
+                        <div className="space-y-3 text-sm">
+                            <div>
+                                <span className="font-medium">Type:</span>{' '}
+                                {viewEvent.event_type}
+                            </div>
+                            <div>
+                                <span className="font-medium">User:</span>{' '}
+                                {viewEvent.user?.email || 'Unknown'}
+                            </div>
+                            <div>
+                                <span className="font-medium">Page:</span>{' '}
+                                {viewEvent.page_url || 'N/A'}
+                            </div>
+                            <div>
+                                <span className="font-medium">Timestamp:</span>{' '}
+                                {new Date(viewEvent.timestamp).toLocaleString()}
+                            </div>
+                            <pre className="rounded-md bg-muted p-3 text-xs overflow-auto max-h-64">
+                                {JSON.stringify(viewEvent.properties, null, 2)}
+                            </pre>
+                        </div>
+                    )}
+                </DialogContent>
+            </Dialog>
+
+            <Dialog open={!!editEvent} onOpenChange={() => setEditEvent(null)}>
+                <DialogContent>
+                    <DialogHeader>
+                        <DialogTitle>Edit Event</DialogTitle>
+                    </DialogHeader>
+                    {editEvent && (
+                        <div className="space-y-3">
+                            <Input
+                                value={editEvent.event_type}
+                                onChange={(event) =>
+                                    setEditEvent((prev) =>
+                                        prev
+                                            ? {
+                                                  ...prev,
+                                                  event_type: event.target.value,
+                                              }
+                                            : prev
+                                    )
+                                }
+                                placeholder="Event type"
+                            />
+                            <Input
+                                value={editEvent.page_url || ''}
+                                onChange={(event) =>
+                                    setEditEvent((prev) =>
+                                        prev
+                                            ? {
+                                                  ...prev,
+                                                  page_url: event.target.value,
+                                              }
+                                            : prev
+                                    )
+                                }
+                                placeholder="Page URL"
+                            />
+                            <Textarea
+                                value={editProperties}
+                                onChange={(event) =>
+                                    setEditProperties(event.target.value)
+                                }
+                                className="min-h-[180px] font-mono text-xs"
+                                placeholder="Event properties JSON"
+                            />
+                        </div>
+                    )}
+                    <DialogFooter>
+                        <Button variant="outline" onClick={() => setEditEvent(null)}>
+                            Cancel
+                        </Button>
+                        <Button onClick={handleSaveEdit}>Save Changes</Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
+        </>
     );
 }
